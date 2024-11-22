@@ -10,7 +10,7 @@ class Policy2210xxx(Policy):
     def ___stock_area___(self,stock):
         x,y=self._get_stock_size_(stock)
         return x*y
-    def ___max_size___(self,stock):
+    def ___csize___(self,stock):
         return  np.max(np.sum(np.any(stock>-1, axis=1))),np.max(np.sum(np.any(stock>-1, axis=0)))
     def get_action(self, observation, info):
         list_prods =sorted(observation["products"],key=lambda x: x["size"][0]*x["size"][1],reverse=True)
@@ -26,8 +26,8 @@ class Policy2210xxx(Policy):
             if c_stock<self.c_stock:
                 continue
             dS=-1
-            mx,my=self.___max_size___(stock)
-            S=mx*my
+            cx,cy=self.___csize___(stock)
+            S=cx*cy
             stock_w, stock_h = self._get_stock_size_(stock)
             c_prod=-1
             for prod in list_prods:
@@ -39,25 +39,18 @@ class Policy2210xxx(Policy):
                     prod_w, prod_h =  prod_size
                     if stock_w < prod_w or stock_h < prod_h:
                         continue
-                    cx=None
-                    cy=None
-                    prod_w, prod_h = prod_size
                     for x in range(stock_w - prod_w + 1):
-                        if x>mx:
+                        if x>cx:
                             continue
                         for y in range(stock_h - prod_h + 1):
-                            if y>my:
+                            if y>cy:
                                 continue
                             if self._can_place_(stock, (x, y), prod_size):
-                                max_x=max(mx,x+prod_w)
-                                max_y=max(my,y+prod_h)
-                                new_S=max_x*max_y
+                                new_S=max(cy,y+prod_h)*max(cx,x+prod_w)
                                 if new_S-S<dS or dS==-1:
-                                    cx=x
-                                    cy=y
-                                    dS=(x+prod_w)*(y+prod_h)-S
-                            
-                    pos_x,pos_y=cx,cy
+                                    pos_x=x
+                                    pos_y=y
+                                    dS=new_S-S
                     if pos_x is not None:
                         break
                 self.c_prod+=1
@@ -66,7 +59,6 @@ class Policy2210xxx(Policy):
                 break
             self.c_stock+=1
             self.c_prod=0
-
         if pos_x is None or out_of_prod:
             self.c_stock=0
             self.c_prod=0

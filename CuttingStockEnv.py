@@ -109,7 +109,7 @@ class CuttingStockEnv:
             if stock[0][0]>0:
                 waste+=int(np.sum(stock==-1))
                 total_use+=int(np.sum(stock>-2))
-        return {"filled_ratio": np.mean(self.cutted_stocks).item(),"wasted":round(waste/(total_use+1e-7),2),"total wasted":waste}
+        return {"filled_ratio": np.mean(self.cutted_stocks).item(),"wasted rate":round(waste/(total_use+1e-7),2),"wasted total":waste}
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
