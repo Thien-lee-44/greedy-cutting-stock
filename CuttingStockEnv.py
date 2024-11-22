@@ -103,7 +103,13 @@ class CuttingStockEnv:
         self._products=prods
         self.cutted_stocks= np.full((self.num_stocks,), fill_value=0, dtype=int)
     def _get_info(self):
-        return {"filled_ratio": np.mean(self.cutted_stocks).item()}
+        waste=0
+        total_use=0
+        for stock in self._stocks:
+            if stock[0][0]>0:
+                waste+=int(np.sum(stock==-1))
+                total_use+=int(np.sum(stock>-2))
+        return {"filled_ratio": np.mean(self.cutted_stocks).item(),"wasted":round(waste/(total_use+1e-7),2),"total wasted":waste}
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
@@ -223,6 +229,7 @@ class CuttingStockEnv:
             for event in pygame.event.get():
                 if event.type==QUIT:
                     pygame.quit()
+                    exit()
 
             # Fill the stocks wuth grey color
             pygame.draw.rect(
