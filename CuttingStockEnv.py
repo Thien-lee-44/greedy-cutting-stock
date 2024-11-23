@@ -106,10 +106,10 @@ class CuttingStockEnv:
         waste=0
         total_use=0
         for stock in self._stocks:
-            if stock[0][0]>0:
+            if stock[0,0]>=0:
                 waste+=int(np.sum(stock==-1))
                 total_use+=int(np.sum(stock>-2))
-        return {"filled_ratio": np.mean(self.cutted_stocks).item(),"wasted rate":round(waste/(total_use+1e-7),2),"wasted total":waste}
+        return {"filled_ratio": np.mean(self.cutted_stocks).item(),"total used":total_use,"wasted rate":round(waste/(total_use+1e-7),2),"wasted total":waste}
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
@@ -177,7 +177,12 @@ class CuttingStockEnv:
                     # Check if the position is empty
                     if np.all(stock[x : x + width, y : y + height] == -1):
                         self.cutted_stocks[stock_idx] = 1
-                        stock[x : x + width, y : y + height] = product_idx
+                        
+                        stock[x : x + width, y : y + height] = product_idx+1
+                        stock[x : x + width, y]=0
+                        stock[x , y : y + height]=0
+                        # stock[x + width-1, y : y + height]=0
+                        # stock[x : x + width, y + height-1]=0
                         self._products[product_idx]["quantity"] -= 1
 
         # An episode is done iff the all product quantities are 0
@@ -218,8 +223,8 @@ class CuttingStockEnv:
         # Create a colormap for the products
         cmap = colormaps.get_cmap("hsv")
         norms = mpl.colors.Normalize(vmin=0, vmax=self.max_product_type - 1)
-        list_colors = [cmap(norms(i)) for i in range(self.max_product_type)]
-
+        list_colors = [cmap(norms(i)) for i in range(self.max_product_type+1)]
+        list_colors[0]=[1,1,1,1]
         # First we draw the stocks with the products
         for i, stock in enumerate(self._stocks):
             # Compute the actual stock width and height
@@ -253,7 +258,6 @@ class CuttingStockEnv:
                             int(color[1] * 255),
                             int(color[2] * 255),
                         )
-                        
                         pygame.draw.rect(
                             canvas,
                             color,
@@ -266,6 +270,8 @@ class CuttingStockEnv:
                                 pix_square_size,
                             )
                         )
+                        
+            
         # Finally, add horizontal and vertical gridlines
         for i in range(window_size[0] // self.max_w):
             pygame.draw.line(
