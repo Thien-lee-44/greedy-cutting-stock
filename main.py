@@ -14,11 +14,13 @@ NUM_EPISODES = 10
 if __name__ == "__main__":
     # Reset the environment
     ep = 0
+    
+    st_policy= Policy2210xxx()
+    gd_policy = GreedyPolicy()
     while ep<NUM_EPISODES:
         observation, info = env.reset(seed=42)
         cpyobs=deepcopy(observation)
         cpyinf=deepcopy(info)
-        st_policy= Policy2210xxx()
         print("EP:",ep)
         start_time = time()
         while True:
@@ -31,7 +33,6 @@ if __name__ == "__main__":
         env._set_obs(cpyobs["stocks"],cpyobs["products"])
         obervation=cpyobs
         info= cpyinf
-        gd_policy = GreedyPolicy()
         start_time = time()
         while True:
             action = gd_policy.get_action(observation, info)

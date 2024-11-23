@@ -6,6 +6,8 @@ class Policy2210xxx(Policy):
         # Student code here
         self.c_stock=0
         self.c_prod=0
+        self.idx_stock=[]
+        self.list_prod=[]
         pass
     def ___stock_area___(self,stock):
         x,y=self._get_stock_size_(stock)
@@ -13,38 +15,35 @@ class Policy2210xxx(Policy):
     def ___csize___(self,stock):
         return  np.max(np.sum(np.any(stock>-1, axis=1))),np.max(np.sum(np.any(stock>-1, axis=0)))
     def get_action(self, observation, info):
-        list_prods =sorted(observation["products"],key=lambda x: x["size"][0]*x["size"][1],reverse=True)
-        list_stock = sorted(enumerate(observation["stocks"]),key=lambda x:self.___stock_area___(x[1]),reverse=True)
-        num_prod=sum(map(lambda x:x["quantity"],list_prods))
-        out_of_prod=(num_prod==1)
+        if(info["filled_ratio"]==0):
+            self.c_stock=0
+            self.c_prod=0
+            self.idx_stock=sorted(enumerate(observation["stocks"]),key=lambda x:self.___stock_area___(x[1]),reverse=True)
+            self.list_prod =sorted(observation["products"],key=lambda x: x["size"][0]*x["size"][1],reverse=True)
         prod_size = [0, 0]
         stock_idx = -1
         pos_x, pos_y = None, None
         c_stock=-1
-        for i, stock in list_stock:
+        for i,_ in self.idx_stock:
             c_stock+=1
-            if c_stock<self.c_stock:
-                continue
-            dS=-1
+            if c_stock<self.c_stock: continue
+            stock=observation["stocks"][i]
             cx,cy=self.___csize___(stock)
             S=cx*cy
             stock_w, stock_h = self._get_stock_size_(stock)
             c_prod=-1
-            for prod in list_prods:
+            dS=-1
+            for prod in self.list_prod:
                 c_prod+=1
-                if c_prod<self.c_prod:
-                    continue
+                if c_prod<self.c_prod: continue
                 if prod["quantity"] > 0:
                     prod_size=prod["size"]
                     prod_w, prod_h =  prod_size
-                    if stock_w < prod_w or stock_h < prod_h:
-                        continue
+                    if stock_w < prod_w or stock_h < prod_h: continue
                     for x in range(stock_w - prod_w + 1):
-                        if x>cx:
-                            continue
+                        if x>cx: continue
                         for y in range(stock_h - prod_h + 1):
-                            if y>cy:
-                                continue
+                            if y>cy: continue
                             if self._can_place_(stock, (x, y), prod_size):
                                 new_S=max(cy,y+prod_h)*max(cx,x+prod_w)
                                 if new_S-S<dS or dS==-1:
@@ -52,15 +51,13 @@ class Policy2210xxx(Policy):
                                     pos_y=y
                                     dS=new_S-S
                     if pos_x is not None:
+                        self.list_prod[c_prod]["quantity"]-=1
                         break
                 self.c_prod+=1
             if pos_x is not None:
                 stock_idx = i
                 break
             self.c_stock+=1
-            self.c_prod=0
-        if pos_x is None or out_of_prod:
-            self.c_stock=0
             self.c_prod=0
         return {"stock_idx": stock_idx, "size": prod_size, "position": (pos_x, pos_y)}
 
