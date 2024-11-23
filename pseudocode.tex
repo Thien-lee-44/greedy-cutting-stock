@@ -1,0 +1,37 @@
+\documentclass[a4paper]{article}
+\usepackage{vntex}
+\usepackage{a4wide,amssymb,epsfig,latexsym,array,hhline,fancyhdr}
+\usepackage[normalem]{ulem}
+\usepackage[makeroom]{cancel}
+\usepackage{alltt}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{caption,subcaption}
+\usepackage{geometry}
+\usetikzlibrary{arrows,snakes,backgrounds}
+\usepackage[unicode]{hyperref}
+\usepackage[normalem]{ulem}
+
+\def\thesislayout{	
+	\geometry{
+		a4paper,
+		total={170mm,240mm},
+		left=20mm,
+		top=30mm,
+	}
+}
+\thesislayout
+\begin{document}
+	
+	cắt từ các stock lớn nhất đến stock nhỏ nhất, từ product lớn nhất đến nhỏ nhất sao cho diện tích bị cắt của stock là thay đổi ít nhất.
+	\begin{mdframed}[backgroundcolor=black!10]
+		for $stock_i$ from the largest to smallest area in stock list:\\
+		\hspace*{0.5cm}for $prod_j$ from the largest to smallest area in product list:\\
+		\hspace*{1cm} for $(x,y)$ in all position can cut $prod_j$ from $stock_i$:\\
+		\hspace*{1.5cm} let $S_{ij}$ be the area of the smallest rectangle contain cut area if cut $prod_j$ at position $(x,y)$:\\
+		\hspace*{1cm} let $(x_{0},y_{0})$ be the position where the value of $S_{ij}$ is smallest\\
+		\hspace*{1cm} cut the $prod_j$ from $stock_i$ at position $(x_{0},y_{0})$\\
+		
+	\end{mdframed}
+	
+\end{document}
+

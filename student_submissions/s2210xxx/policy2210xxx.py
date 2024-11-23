@@ -29,10 +29,8 @@ class Policy2210xxx(Policy):
             if c_stock<self.c_stock: continue
             stock=observation["stocks"][i]
             cx,cy=self.___csize___(stock)
-            S=cx*cy
             stock_w, stock_h = self._get_stock_size_(stock)
             c_prod=-1
-            dS=-1
             for prod in self.list_prod:
                 c_prod+=1
                 if c_prod<self.c_prod: continue
@@ -40,16 +38,17 @@ class Policy2210xxx(Policy):
                     prod_size=prod["size"]
                     prod_w, prod_h =  prod_size
                     if stock_w < prod_w or stock_h < prod_h: continue
+                    min_S=-1
                     for x in range(stock_w - prod_w + 1):
                         if x>cx: continue
                         for y in range(stock_h - prod_h + 1):
                             if y>cy: continue
                             if self._can_place_(stock, (x, y), prod_size):
                                 new_S=max(cy,y+prod_h)*max(cx,x+prod_w)
-                                if new_S-S<dS or dS==-1:
+                                if new_S<min_S or min_S==-1:
                                     pos_x=x
                                     pos_y=y
-                                    dS=new_S-S
+                                    min_S=new_S
                     if pos_x is not None:
                         self.list_prod[c_prod]["quantity"]-=1
                         break
