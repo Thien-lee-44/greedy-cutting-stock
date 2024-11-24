@@ -30,8 +30,10 @@
 		\hspace*{1.5cm} let $S_{ij}$ be the area of the smallest rectangle contain cut area if cut $prod_j$ at position $(x,y)$:\\
 		\hspace*{1cm} let $(x_{0},y_{0})$ be the position where the value of $S_{ij}$ is smallest\\
 		\hspace*{1cm} cut the $prod_j$ from $stock_i$ at position $(x_{0},y_{0})$\\
-		
-	\end{mdframed}
+		for $stock_i$ from the smallest to largest area in cut stock list:\\
+		\hspace*{0.5cm}for $stock_j$ from the smallest to largest area in uncut stock list:\\
+		\hspace*{1cm} if cut area of $stock_i$ is smaller than $stock_j$:\\
+		\hspace*{1.5cm} move cut set of $stock_i$ to $stock_j$\\
 	
 \end{document}
 

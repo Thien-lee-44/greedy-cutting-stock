@@ -8,7 +8,8 @@ from time import time,sleep
 #     "gym_cutting_stock/CuttingStock-v0",
 #    render_mode="human",  # Comment this line to disable rendering
 # )
-env =CuttingStockEnv(render_mode="human"
+env =CuttingStockEnv(
+    # render_mode="human"
                      )
 NUM_EPISODES = 2
 
