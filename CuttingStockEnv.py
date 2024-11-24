@@ -145,7 +145,11 @@ class CuttingStockEnv:
             self._render_frame()
 
         return observation, info
+    def _get_stock_size_(self, stock):
+        stock_w = np.sum(np.any(stock != -2, axis=1))
+        stock_h = np.sum(np.any(stock != -2, axis=0))
 
+        return stock_w, stock_h
     def step(self, action):
         stock_idx = action["stock_idx"]
         size = action["size"]
@@ -158,10 +162,8 @@ class CuttingStockEnv:
             if np.array_equal(product["size"], size):
                 if product["quantity"] == 0:
                     continue
-
                 product_idx = i  # Product index starts from 0
                 break
-
         if product_idx is not None:
             if 0 <= stock_idx < self.num_stocks:
                 stock = self._stocks[stock_idx]
@@ -179,19 +181,18 @@ class CuttingStockEnv:
                         self.cutted_stocks[stock_idx] = 1
                         
                         stock[x : x + width, y : y + height] = product_idx+1
-                        stock[x : x + width, y]=0
-                        stock[x , y : y + height]=0
-                        # stock[x + width-1, y : y + height]=0
-                        # stock[x : x + width, y + height-1]=0
+                        #stock[x : x + width, y]=0
+                        #stock[x , y : y + height]=0
+                        stock[x + width-1, y : y + height]=0
+                        stock[x : x + width, y + height-1]=0
                         self._products[product_idx]["quantity"] -= 1
-
+        
         # An episode is done iff the all product quantities are 0
         terminated = all([product["quantity"] == 0 for product in self._products])
         reward = 1 if terminated else 0  # Binary sparse rewards
 
         observation = self._get_obs()
         info = self._get_info()
-
         if self.render_mode == "human":
             self._render_frame()
 

@@ -2,14 +2,15 @@ from CuttingStockEnv import CuttingStockEnv
 from policy import GreedyPolicy, RandomPolicy
 from student_submissions.s2210xxx.policy2210xxx import Policy2210xxx
 from copy import deepcopy
-from time import time
+from time import time,sleep
 # Create the environment
 # env = gym.make(
 #     "gym_cutting_stock/CuttingStock-v0",
 #    render_mode="human",  # Comment this line to disable rendering
 # )
-env =CuttingStockEnv(render_mode="human")
-NUM_EPISODES = 10
+env =CuttingStockEnv(render_mode="human"
+                     )
+NUM_EPISODES = 2
 
 if __name__ == "__main__":
     # Reset the environment
@@ -29,9 +30,10 @@ if __name__ == "__main__":
             if terminated or truncated:
                 end_time = time()
                 print("greedy1",info,"time:",round(end_time-start_time,2),"second")
+                sleep(2)
                 break
         env._set_obs(cpyobs["stocks"],cpyobs["products"])
-        obervation=cpyobs
+        observation=cpyobs
         info= cpyinf
         start_time = time()
         while True:
