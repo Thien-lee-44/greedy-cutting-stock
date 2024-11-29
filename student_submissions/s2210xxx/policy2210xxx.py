@@ -11,6 +11,7 @@ class CPolicy(Policy):
         self.list_action=[]
         self.num_prod=[0]
         self.prod_area_left=0
+        self.prod_area=0
     def ___stock_area___(self,stock):
         x,y=self._get_stock_size_(stock)
         return x*y
@@ -53,7 +54,7 @@ class CPolicy(Policy):
         prod_size=prod["size"]
         prod_w, prod_h =  prod_size
         if stock_w < prod_w or stock_h < prod_h: return pos_x,pos_y,minx,miny
-        if self.prod_area_left<stock_h*stock_w*0.75:
+        if self.prod_area<stock_h*stock_w*0.75:
             min_S=-1
             for x in range(stock_w - prod_w + 1):
                 if x>cx: continue
@@ -85,6 +86,7 @@ class CPolicy(Policy):
             stock_idx = i
             stock=self._stocks[i]
             for j,prod in self.list_prod:
+                self.prod_area=self.prod_area_left
                 while prod["quantity"] > 0:
                     prod_size = prod["size"]
                     pos_x, pos_y,mx ,my = self.place_prod(stock,prod)
