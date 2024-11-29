@@ -6,7 +6,7 @@ from pygame.locals import QUIT
 from gymnasium import spaces
 from matplotlib import colormaps
 import pygame.locals
-
+# from PIL import Image
 
 class CuttingStockEnv:
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 5}
@@ -23,6 +23,8 @@ class CuttingStockEnv:
         max_product_per_type=20,
         seed=42,
     ):
+        # self.frames = []
+        # self.namepoli=["combine.gif","bestfit.gif","firstfit.gif"]
         self.seed = seed
         self.min_w = min_w
         self.min_h = min_h
@@ -112,6 +114,7 @@ class CuttingStockEnv:
         return {"filled_ratio": np.mean(self.cutted_stocks).item(),"total used":total_use,"wasted rate":round(waste/(total_use+1e-7),2),"wasted total":waste}
 
     def reset(self, seed=None, options=None):
+        self.frames = []
         # We need the following line to seed self.np_random
         #super().reset(seed=seed)
         self.cutted_stocks = np.full((self.num_stocks,), fill_value=0, dtype=int)
@@ -190,7 +193,10 @@ class CuttingStockEnv:
         # An episode is done iff the all product quantities are 0
         terminated = all([product["quantity"] == 0 for product in self._products])
         reward = 1 if terminated else 0  # Binary sparse rewards
-
+        
+        # if reward==1:
+        #     self.frames[0].save(self.namepoli[0], save_all=True, append_images=self.frames[1:], duration=100, loop=0)
+        #     self.namepoli.pop(0)
         observation = self._get_obs()
         info = self._get_info()
         if self.render_mode == "human":
@@ -302,7 +308,9 @@ class CuttingStockEnv:
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
-
+        # frame_data = pygame.surfarray.array3d(canvas)  # Lấy dữ liệu pixel
+        # frame_data = frame_data.transpose((1, 0, 2))  # Chuyển đổi trục từ (x, y, màu) -> (y, x, màu)
+        # self.frames.append(Image.fromarray(frame_data))
     def close(self):
         if self.window is not None:
             pygame.display.quit()

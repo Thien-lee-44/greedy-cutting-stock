@@ -1,6 +1,6 @@
 from CuttingStockEnv import CuttingStockEnv
 from policy import GreedyPolicy, RandomPolicy
-from student_submissions.s2210xxx.policy2210xxx import Policy2210xxx
+from student_submissions.s2210xxx.policy2210xxx import *
 from copy import deepcopy
 from time import time,sleep
 # Create the environment
@@ -9,16 +9,17 @@ from time import time,sleep
 #    render_mode="human",  # Comment this line to disable rendering
 # )
 env =CuttingStockEnv(
-    # render_mode="human"
+     render_mode="human"
                      )
-NUM_EPISODES = 2
+NUM_EPISODES = 1
 
 if __name__ == "__main__":
     # Reset the environment
     ep = 0
     
-    st_policy= Policy2210xxx()
-    gd_policy = GreedyPolicy()
+    cpolicy= CPolicy()
+    ffpolicy = FFPolicy()
+    bfpolicy =BFPolicy()
     while ep<NUM_EPISODES:
         observation, info = env.reset(seed=42)
         cpyobs=deepcopy(observation)
@@ -26,26 +27,40 @@ if __name__ == "__main__":
         print("EP:",ep)
         start_time = time()
         while True:
-            action = st_policy.get_action(observation, info)
+            action = cpolicy.get_action(observation, info)
             observation, reward, terminated, truncated, info = env.step(action)
             if terminated or truncated:
                 end_time = time()
-                print("greedy1",info,"time:",round(end_time-start_time,2),"second")
+                print("combine",info,"time:",round(end_time-start_time,2),"second")
                 sleep(2)
                 break
         env._set_obs(cpyobs["stocks"],cpyobs["products"])
         observation=cpyobs
         info= cpyinf
+        cpyobs=deepcopy(observation)
+        cpyinf=deepcopy(info)
         start_time = time()
         while True:
-            action = gd_policy.get_action(observation, info)
+            action = bfpolicy.get_action(observation, info)
             observation, reward, terminated, truncated, info = env.step(action)
             if terminated or truncated:
                 end_time = time()
-                print("greedy2",info,"time:",round(end_time-start_time,2),"second")
+                print("best fit",info,"time:",round(end_time-start_time,2),"second")
+                break
+        env._set_obs(cpyobs["stocks"],cpyobs["products"])
+        observation=cpyobs
+        info= cpyinf
+        cpyobs=deepcopy(observation)
+        cpyinf=deepcopy(info)
+        start_time = time()
+        while True:
+            action = ffpolicy.get_action(observation, info)
+            observation, reward, terminated, truncated, info = env.step(action)
+            if terminated or truncated:
+                end_time = time()
+                print("First fit",info,"time:",round(end_time-start_time,2),"second")
                 ep+=1
                 break
-
     # Reset the environment
 
     # Test GreedyPolicy
