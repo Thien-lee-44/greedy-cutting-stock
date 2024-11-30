@@ -194,15 +194,16 @@ class CuttingStockEnv:
         terminated = all([product["quantity"] == 0 for product in self._products])
         reward = 1 if terminated else 0  # Binary sparse rewards
         
-        if reward==1 and self.render_mode=="human":
-            self.frames[0].save(self.namepoli[0], save_all=True, append_images=self.frames[1:], duration=100, loop=0)
-            self.namepoli.pop(0)
-            self.frames.clear()
+        
         observation = self._get_obs()
         info = self._get_info()
         if self.render_mode == "human":
             self._render_frame()
-
+        if reward==1 and self.render_mode=="human":
+            for _ in range (100): self.frames.append(self.frames[-1])
+            self.frames[0].save(self.namepoli[0], save_all=True, append_images=self.frames[1:], duration=100, loop=0)
+            self.namepoli.pop(0)
+            self.frames.clear()
         return observation, reward, terminated, False, info
 
     def render(self):

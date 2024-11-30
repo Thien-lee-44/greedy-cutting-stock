@@ -9,19 +9,23 @@ from time import time,sleep
 #    render_mode="human",  # Comment this line to disable rendering
 # )
 env =CuttingStockEnv(
-     render_mode="human"
+     #render_mode="human"
                      )
-NUM_EPISODES = 1
 
+NUM_EPISODES = 2
 if __name__ == "__main__":
     # Reset the environment
     ep = 0
-    
+    observation, info = env.reset(seed=42)
+    cpyobs=deepcopy(observation)
+    cpyinf=deepcopy(info)
     cpolicy= CPolicy()
     ffpolicy = FFPolicy()
     bfpolicy =BFPolicy()
     while ep<NUM_EPISODES:
-        observation, info = env.reset(seed=42)
+        env._set_obs(cpyobs["stocks"],cpyobs["products"])
+        observation=cpyobs
+        info= cpyinf
         cpyobs=deepcopy(observation)
         cpyinf=deepcopy(info)
         print("EP:",ep)
@@ -61,6 +65,8 @@ if __name__ == "__main__":
                 print("First fit",info,"time:",round(end_time-start_time,2),"second")
                 ep+=1
                 break
+        
+        env.render_mode="human"
     # Reset the environment
 
     # Test GreedyPolicy
