@@ -23,7 +23,7 @@ class CPolicy(Policy):
             self._stocks=deepcopy(observation["stocks"])
             self.num_stocks=deepcopy(len(self._stocks))
             for prod in observation["products"]:
-                self.prod_area_left+=np.prod(prod["size"])
+                self.prod_area_left+=np.prod(prod["size"])*prod["quantity"]
             self.idx_stock=sorted(enumerate(observation["stocks"]),key=lambda x:self.___stock_area___(x[1]),reverse=True)
             self.list_prod =sorted(enumerate(deepcopy(observation["products"])),key=lambda x: x[1]["size"][0]*x[1]["size"][1],reverse=True)
             self.render_action()
@@ -65,7 +65,7 @@ class CPolicy(Policy):
                         my=max(cy,y+prod_h)
                         new_S=mx*my
                         f=stock_w/stock_h
-                        if( new_S<min_S or min_S==-1 ) and ( cx==0 or (mx/my<=cx/cy and cx/cy>=f)or (mx/my>=cx/cy and cx/cy<=f) )and (x==0 or stock[x-1][y]>=0) and (y==0 or stock[x][y-1]>=0)  :
+                        if( new_S<min_S or min_S==-1 ) and ( (cx==0 and cy==0) or (mx/my<=cx/cy and cx/cy>=f)or (mx/my>=cx/cy and cx/cy<=f) )and (x==0 or stock[x-1][y]>=0) and (y==0 or stock[x][y-1]>=0)  :
                             pos_x,pos_y,minx,miny,min_S=x,y,mx,my,new_S
             if pos_x is not None: return pos_x,pos_y,minx,miny  
         min_S=-1    
@@ -85,8 +85,8 @@ class CPolicy(Policy):
         for i,_ in self.idx_stock: 
             stock_idx = i
             stock=self._stocks[i]
+            self.prod_area=self.prod_area_left
             for j,prod in self.list_prod:
-                self.prod_area=self.prod_area_left
                 while prod["quantity"] > 0:
                     prod_size = prod["size"]
                     pos_x, pos_y,mx ,my = self.place_prod(stock,prod)
@@ -109,6 +109,11 @@ class CPolicy(Policy):
 class BFPolicy(Policy):
     def __init__(self):
         self.c_stock=0
+        self.idx_stock=[]
+        self.list_prod=[]
+        self.prod_area_left=0
+        self.prod_area=0
+        self.m=True
     def ___stock_area___(self,stock):
         x,y=self._get_stock_size_(stock)
         return x*y
@@ -117,6 +122,9 @@ class BFPolicy(Policy):
     def get_action(self, observation, info):
         if(info["filled_ratio"]==0):
             self.__init__()
+            for prod in observation["products"]:
+                self.prod_area_left+=np.prod(prod["size"])*prod["quantity"]
+            self.prod_area=self.prod_area_left
             self.idx_stock=sorted(enumerate(observation["stocks"]),key=lambda x:self.___stock_area___(x[1]),reverse=True)
             self.list_prod =sorted(observation["products"],key=lambda x: x["size"][0]*x["size"][1],reverse=True)
         prod_size = [0, 0]
@@ -127,35 +135,43 @@ class BFPolicy(Policy):
             c_stock+=1
             if c_stock<self.c_stock: continue
             stock=observation["stocks"][i]
-            cx,cy=self.___csize___(stock)
             stock_w, stock_h = self._get_stock_size_(stock)
+            if self.prod_area<stock_h*stock_w*0.75 and c_stock<len(self.idx_stock)-1 and self.m : 
+                self.c_stock+=1
+                continue
+            cx,cy=self.___csize___(stock)
             # c_prod=-1
+            
+            min_dS=-1
+            min_size = [0, 0]
             for prod in self.list_prod:
                 # c_prod+=1
                 # if c_prod<self.c_prod: continue
                 if prod["quantity"] > 0:
-                    min_dS=-1
-                    prod_size=prod["size"]
-                    prod_w, prod_h =  prod_size
+                    min_size=prod["size"]
+                    prod_w, prod_h =  min_size
                     if stock_w < prod_w or stock_h < prod_h: continue
                     for x in range(stock_w - prod_w + 1):
                         if x>cx: continue
                         for y in range(stock_h - prod_h + 1):
                             if y>cy: continue
-                            if self._can_place_(stock, (x, y), prod_size):
+                            if self._can_place_(stock, (x, y), min_size):
                                 new_S=max(cy,y+prod_h)*max(cx,x+prod_w)
                                 dS=(new_S-cx*cy)/(prod_h*prod_w)
-                                if dS<min_dS or min_dS==-1:
+                                if dS<min_dS  or min_dS==-1:
+                                    prod_size=min_size
                                     pos_x=x
                                     pos_y=y
                                     min_dS=dS
-                    if pos_x is not None:
-                        break
-                # self.c_prod+=1
             if pos_x is not None:
                 stock_idx = i
+                self.prod_area_left-=np.prod(prod_size)
                 break
+            if self.c_stock==len(self.idx_stock)-1:
+                self.c_stock-=2
+                self.m =False
             self.c_stock+=1
+            self.prod_area=self.prod_area_left
             # self.c_prod=0
         return {"stock_idx": stock_idx, "size": prod_size, "position": (pos_x, pos_y)}
         
@@ -170,6 +186,8 @@ class FFPolicy(Policy):
         self.c_stock=0
         self.idx_stock=[]
         self.list_prod=[]
+        self.prod_area_left=0
+        self.m=True
     def ___stock_area___(self,stock):
         x,y=self._get_stock_size_(stock)
         return x*y
@@ -178,6 +196,9 @@ class FFPolicy(Policy):
     def get_action(self, observation, info):
         if(info["filled_ratio"]==0):
             self.__init__()
+            for prod in observation["products"]:
+                self.prod_area_left+=np.prod(prod["size"])*prod["quantity"]
+            self.prod_area=self.prod_area_left
             self.idx_stock=sorted(enumerate(observation["stocks"]),key=lambda x:self.___stock_area___(x[1]),reverse=True)
             self.list_prod =sorted(observation["products"],key=lambda x: x["size"][0]*x["size"][1],reverse=True)
         prod_size = [0, 0]
@@ -188,9 +209,12 @@ class FFPolicy(Policy):
             c_stock+=1
             if c_stock<self.c_stock: continue
             stock=observation["stocks"][i]
-            cx,cy=self.___csize___(stock)
             stock_w, stock_h = self._get_stock_size_(stock)
+            if self.prod_area<stock_h*stock_w*0.75 and c_stock<len(self.idx_stock)-1 and self.m: 
+                self.c_stock+=1
+                continue
             c_prod=-1
+            cx,cy=self.___csize___(stock)
             for prod in self.list_prod:
                 c_prod+=1
                 if c_prod<self.c_prod: continue
@@ -207,14 +231,19 @@ class FFPolicy(Policy):
                                 pos_y=y
                                 break
                         if pos_x is not None:
-                            break    
+                            break   
                     if pos_x is not None:
                         break
                 self.c_prod+=1
             if pos_x is not None:
                 stock_idx = i
+                self.prod_area_left-=np.prod(prod_size)
                 break
+            if self.c_stock==len(self.idx_stock)-1:
+                self.c_stock-=2
+                self.m =False
             self.c_stock+=1
             self.c_prod=0
+            self.prod_area=self.prod_area_left
         return {"stock_idx": stock_idx, "size": prod_size, "position": (pos_x, pos_y)}
         
