@@ -9,7 +9,7 @@ from time import time,sleep
 #    render_mode="human",  # Comment this line to disable rendering
 # )
 env =CuttingStockEnv(
-     #render_mode="human"
+    #  render_mode="human"
                      )
 
 NUM_EPISODES = 2
@@ -36,7 +36,7 @@ if __name__ == "__main__":
             if terminated or truncated:
                 end_time = time()
                 print("combine",info,"time:",round(end_time-start_time,2),"second")
-                sleep(2)
+                # sleep(2)
                 break
         env._set_obs(cpyobs["stocks"],cpyobs["products"])
         observation=cpyobs

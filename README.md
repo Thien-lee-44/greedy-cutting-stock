@@ -1,19 +1,19 @@
 Demo combine:
-{'filled_ratio': 0.09, 'total used': 74805, 'wasted rate': 0.08, 'wasted total': 5907}<br>
+{'filled_ratio': 0.31, 'total used': 236676, 'wasted rate': 0.1, 'wasted total': 22641}<br>
 Time:<br>
--Not render: 4.27 seconds<br>
--Render:     30.42 second<br>
+-Not render: 22.21  seconds<br>
+-Render:     85.28 second<br>
 ![combine](demo/combine.gif)
 Demo best fit:
-{'filled_ratio': 0.12, 'total used': 94175, 'wasted rate': 0.27, 'wasted total': 25277} <br>
+{'filled_ratio': 0.33, 'total used': 247804, 'wasted rate': 0.14, 'wasted total': 33769}<br>
 Time:<br>
--Not render: 19.31 second<br>
--Render:     34.41 second<br>
+-Not render: 110.45 second<br>
+-Render:     164.11 second<br>
 ![best fit](demo/bestfit.gif)
 Demo first fit:
-{'filled_ratio': 0.09, 'total used': 75387, 'wasted rate': 0.09, 'wasted total': 6489} <br>
+ {'filled_ratio': 0.31, 'total used': 237632, 'wasted rate': 0.1, 'wasted total': 23597} <br>
 Time:<br>
--Not render: 3.32 second<br>
--Render:     26.4 second<br>
+-Not render:  10.83 second<br>
+-Render:      72.45 second<br>
 ![first fit](demo/firstfit.gif)
 

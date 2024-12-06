@@ -162,7 +162,7 @@ class CuttingStockEnv:
         # Check if the product is in the product list
         product_idx = None
         for i, product in enumerate(self._products):
-            if np.array_equal(product["size"], size):
+            if np.array_equal(product["size"], size) or np.array_equal(product["size"], size[::-1]):
                 if product["quantity"] == 0:
                     continue
                 product_idx = i  # Product index starts from 0
